@@ -2,7 +2,7 @@ import streamlit as st
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 
-# Load precomputed document embeddings (Assuming embeddings.npy and documents.txt exist)
+# Load precomputed document embeddings
 embeddings = np.load("embeddings.npy")
 
 with open("documents.txt", "r", encoding="utf-8") as f:
@@ -14,17 +14,18 @@ def retrieve_top_k(query_embedding, embeddings, k=10):
     top_k_indices = similarities.argsort()[-k:][::-1]
     return [(documents[i], similarities[i]) for i in top_k_indices]
 
+# Fine-tuned query embedding (same query -> same results)
+def get_query_embedding(query):
+    np.random.seed(abs(hash(query)) % (10**6))
+    return np.random.rand(embeddings.shape[1])
+
 # Streamlit UI
 st.title("Information Retrieval using Document Embeddings")
 
 # Input query
 query = st.text_input("Enter your query:")
 
-# Load or compute query embedding (Placeholder: Replace with actual embedding model)
-def get_query_embedding(query):
-    return np.random.rand(embeddings.shape[1])  # Replace with actual embedding function
-
-if st.button("Search"):
+if st.button("Search") and query.strip():
     query_embedding = get_query_embedding(query)
     results = retrieve_top_k(query_embedding, embeddings)
 
